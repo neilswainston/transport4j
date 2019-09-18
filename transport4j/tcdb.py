@@ -15,20 +15,23 @@ from Bio import SeqIO
 import pandas as pd
 
 
-def get_data(out_dir='data'):
+def parse(out_dir='data'):
     '''Get data.'''
-    fasta_df = _get_fasta(out_dir)
+    fasta_df = _get_fasta_df(out_dir)
     fasta_df.to_csv('fasta.csv', index=False)
 
-    df = pd.concat([pd.read_csv(_get_file('human.csv', out_dir)),
-                    pd.read_csv(_get_file('human_specific.csv', out_dir))])
+    human_df = pd.concat(
+        [pd.read_csv(_get_file('human.csv', out_dir)),
+         pd.read_csv(_get_file('human_specific.csv', out_dir))])
 
-    df = df.drop_duplicates()
-    df.to_csv('human.csv', index=False)
+    human_df = human_df.drop_duplicates()
+    human_df.to_csv('human.csv', index=False)
+
+    return None
 
 
-def _get_fasta(out_dir):
-    '''Get fasta data.'''
+def _get_fasta_df(out_dir):
+    '''Get fasta DataFrame.'''
     regex = re.compile(
         r'gnl\|TC-DB\|([^\|]+)\|(\S+) ?([^\[]*) ?(?:(?:\[)(.*)(?:\]))?')
 
@@ -59,7 +62,7 @@ def _get_file(filename, out_dir):
 
 def main(args):
     '''main method.'''
-    get_data(args[0])
+    parse(args[0])
 
 
 if __name__ == '__main__':
