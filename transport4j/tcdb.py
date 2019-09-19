@@ -18,18 +18,26 @@ import pandas as pd
 
 def parse(out_dir='data'):
     '''Get data.'''
-    fasta_df = _get_fasta_df(out_dir)
-    fasta_df.to_csv('fasta.csv', index=False)
 
+    # Parse fasta data:
+    fasta_df = _get_fasta_df(out_dir)
+    # fasta_df.to_csv('fasta.csv', index=False)
+
+    # Parse human data:
     human_df = pd.concat(
         [pd.read_csv(_get_file('human.csv', out_dir)),
          pd.read_csv(_get_file('human_specific.csv', out_dir))])
 
     human_df = human_df.drop_duplicates()
     human_df['organism'] = 'Homo sapiens'
-    human_df.to_csv('human.csv', index=False)
+    human_df.rename(columns={'Accession': 'uniprot'}, inplace=True)
+    # human_df.to_csv('human.csv', index=False)
 
-    return None
+    # Consolidate:
+    df = pd.concat([fasta_df, human_df], sort=False)
+    df[':LABEL'] = 'Protein|Transporter'
+
+    return df
 
 
 def _get_fasta_df(out_dir):
@@ -61,6 +69,12 @@ def _parse_name(row):
 
     # Generate dict:
     pairs = dict(_grouped(terms[1:], 2))
+
+    if pairs:
+        # If source is inferred as uniprot, update ids accordingly:
+        pairs['uniprot'] = row.get('id', None)
+        row.drop('id')
+
     pairs['Name'] = terms[0]
     pairs['organism'] = row['organism'] if row['organism'] \
         else pairs.get('OS', None)
@@ -94,7 +108,8 @@ def _get_file(filename, out_dir):
 
 def main(args):
     '''main method.'''
-    parse(args[0])
+    df = parse(args[0])
+    df.to_csv('out.csv', index=False)
 
 
 if __name__ == '__main__':

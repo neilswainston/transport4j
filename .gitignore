@@ -103,7 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+**/.DS_Store
 /.project
 /.pydevproject
-/data/
-
+/data/*
+/neo4j/input/nodes/*
+/neo4j/input/rels/*
