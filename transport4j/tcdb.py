@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 import os.path
 import re
 import sys
@@ -25,6 +26,7 @@ def parse(out_dir='data'):
          pd.read_csv(_get_file('human_specific.csv', out_dir))])
 
     human_df = human_df.drop_duplicates()
+    human_df['organism'] = 'Homo sapiens'
     human_df.to_csv('human.csv', index=False)
 
     return None
@@ -40,10 +42,40 @@ def _get_fasta_df(out_dir):
     for record in SeqIO.parse(_get_file('tcdb', out_dir), 'fasta'):
         match = regex.match(record.description)
 
-        data.append(list(match.groups()) + [record.seq])
+        data.append([term.strip() if term else term
+                     for term in match.groups()] + [record.seq])
 
-    return pd.DataFrame(data,
-                        columns=['id', 'tcdb_id', 'name', 'organism', 'seq'])
+    df = pd.DataFrame(data,
+                      columns=['id', 'TCID', 'Name', 'organism', 'Sequence'])
+
+    df = df.apply(_parse_name, axis=1)
+
+    return df
+
+
+def _parse_name(row):
+    '''Parse Name field from fasta.'''
+    # Parse Name field:
+    regex = re.compile(r'\s+([A-Z]{2})=')
+    terms = regex.split(row['Name'])
+
+    # Generate dict:
+    pairs = dict(_grouped(terms[1:], 2))
+    pairs['Name'] = terms[0]
+    pairs['organism'] = row['organism'] if row['organism'] \
+        else pairs.get('OS', None)
+    pairs.pop('OS', None)
+
+    # Update row:
+    for key, value in pairs.items():
+        row[key] = value
+
+    return row
+
+
+def _grouped(iterable, n):
+    '''Group list into chunks of length n.'''
+    return zip(*[iter(iterable)] * n)
 
 
 def _get_file(filename, out_dir):
