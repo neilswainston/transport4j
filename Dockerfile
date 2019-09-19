@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python
 
 # Make current directory visible inside Docker container:
 COPY . /transport4j

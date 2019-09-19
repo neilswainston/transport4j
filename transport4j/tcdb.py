@@ -34,10 +34,7 @@ def parse(out_dir='data'):
     # human_df.to_csv('human.csv', index=False)
 
     # Consolidate:
-    df = pd.concat([fasta_df, human_df], sort=False)
-    df[':LABEL'] = 'Protein|Transporter'
-
-    return df
+    return pd.concat([fasta_df, human_df], sort=False)
 
 
 def _get_fasta_df(out_dir):
