@@ -12,4 +12,4 @@ RUN pip install --upgrade pip \
 ENV PYTHONPATH $PYTHONPATH:.
 
 # Run:
-ENTRYPOINT ["python", "-u", "transport4j/parser.py"]
+ENTRYPOINT ["python", "-u", "transport4j/parser.py", "data", "neo4j/input"]

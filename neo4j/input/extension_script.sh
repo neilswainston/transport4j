@@ -9,4 +9,5 @@ rels_str=`echo $rels| sed "s/ / --relationships /g"`
 	import \
 	--nodes $nodes_str \
 	--relationships $rels_str \
-	--multiline-fields true
+	--multiline-fields true \
+	--array-delimiter "|"
